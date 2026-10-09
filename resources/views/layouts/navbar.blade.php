@@ -2,7 +2,7 @@
     <div class="container">
         <!-- Logo / Título Principal -->
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url('/') }}">
-            <span class="me-2 fs-5">🟢</span> AdminSENA
+            <span class="me-2 fs-5">"cliente"</span> AdminSENA
         </a>
 
         <!-- Botón hamburguesa para dispositivos móviles -->
@@ -17,21 +17,21 @@
                 <!-- Módulo de Áreas -->
                 <li class="nav-item">
                     <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('area.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('area.index') }}">
-                        📂 Áreas
+                        Áreas
                     </a>
                 </li>
 
                 <!-- Módulo de Centros de Formación -->
                 <li class="nav-item">
                     <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('trainig-center.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('trainig-center.index') }}">
-                        🏢 Centros
+                        Centros
                     </a>
                 </li>
 
                 <!-- Módulo de Computadores -->
                 <li class="nav-item">
                     <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('computer.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('computer.index') }}">
-                        💻 Inventario PC
+                        Inventario PC
                     </a>
                 </li>
 

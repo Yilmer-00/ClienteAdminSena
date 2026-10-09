@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="text-muted fw-bold">Módulo de Centros</span>
         <a href="{{ route('trainig-center.create') }}" class="btn btn-success btn-sm shadow-sm" style="background-color: #39A900; border: none;">
-            ➕ Nuevo Centro de Formación
+            + Nuevo Centro de Formación
         </a>
     </div>
 
@@ -45,13 +45,25 @@
                                 <i class="fas fa-map-marker-alt text-success me-1"></i> {{ $center['location'] }}
                             </td>
                             <td class="pe-4 text-center">
-                                <div class="d-flex gap-2 justify-content-center">
+                                <div class="d-flex gap-2 justify-content-center align-items-center">
+                                    <!-- Botón Mostrar -->
                                     <a href="{{ route('trainig-center.show', $center['id']) }}" class="btn btn-primary btn-sm shadow-sm">
-                                        👁️ Mostrar
+                                        Mostrar
                                     </a>
+
+                                    <!-- Botón Editar -->
                                     <a href="{{ route('trainig-center.edit', $center['id']) }}" class="btn btn-warning btn-sm text-dark fw-semibold shadow-sm">
-                                        ✏️ Editar
+                                        Editar
                                     </a>
+
+                                    <!-- Formulario y Botón Eliminar -->
+                                    <form action="{{ route('trainig-center.destroy', $center['id']) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este centro?');" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm shadow-sm">
+                                            Eliminar
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

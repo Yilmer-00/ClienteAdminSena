@@ -9,9 +9,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ==========================================
-// RUTAS PARA ÁREAS
-// ==========================================
+
 Route::get('/areas', [AreaController::class, 'index'])->name('area.index');
 Route::get('/areas/create', [AreaController::class, 'create'])->name('area.create');
 Route::post('/areas', [AreaController::class, 'store'])->name('area.store');
@@ -20,9 +18,7 @@ Route::get('/areas/{id}/edit', [AreaController::class, 'edit'])->name('area.edit
 Route::put('/areas/{id}', [AreaController::class, 'update'])->name('area.update');
 Route::delete('/areas/{id}', [AreaController::class, 'destroy'])->name('area.destroy');
 
-// ==========================================
-// RUTAS PARA COMPUTADORES
-// ==========================================
+
 Route::get('/computers', [ComputerController::class, 'index'])->name('computer.index');
 Route::get('/computers/create', [ComputerController::class, 'create'])->name('computer.create');
 Route::post('/computers', [ComputerController::class, 'store'])->name('computer.store');
@@ -31,9 +27,7 @@ Route::get('/computers/{id}/edit', [ComputerController::class, 'edit'])->name('c
 Route::put('/computers/{id}', [ComputerController::class, 'update'])->name('computer.update');
 Route::delete('/computers/{id}', [ComputerController::class, 'destroy'])->name('computer.destroy');
 
-// ==========================================
-// RUTAS PARA CENTROS DE FORMACIÓN
-// ==========================================
+
 Route::get('/training-centers', [TrainigCenterController::class, 'index'])->name('trainig-center.index');
 Route::get('/training-centers/create', [TrainigCenterController::class, 'create'])->name('trainig-center.create');
 Route::post('/training-centers', [TrainigCenterController::class, 'store'])->name('trainig-center.store');

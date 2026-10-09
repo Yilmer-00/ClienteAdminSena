@@ -7,18 +7,18 @@ use Illuminate\Support\Facades\Http;
 
 class AreaController extends Controller
 {
-    /**
-     * Método privado para manejar llamadas HTTP repetitivas (GET)
-     */
+
+    //Método privado para manejar llamadas HTTP repetitivas (GET)
+
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
         return $response->json();
     }
 
-    /**
-     * Mostrar una lista de todas las áreas consumiendo la API.
-     */
+
+    //Mostrar una lista de todas las áreas consumiendo la API.
+
     public function index()
     {
         $url = env('URL_SERVER_API');
@@ -30,17 +30,17 @@ class AreaController extends Controller
         return view('areas.index', compact('areas'));
     }
 
-    /**
-     * Mostrar el formulario para registrar una nueva área.
-     */
+
+    //Mostrar el formulario para registrar una nueva área.
+
     public function create()
     {
         return view('areas.create');
     }
 
-    /**
-     * Almacenar una nueva área enviándola a la API.
-     */
+
+    //Almacenar una nueva área enviándola a la API.
+
     public function store(Request $request)
     {
         $request->validate([
@@ -53,15 +53,15 @@ class AreaController extends Controller
         ]);
 
         if ($response->successful()) {
-            return redirect()->route('area.index')->with('success', 'Área creada correctamente.');
+            return redirect()->route('area.index')->with('success', 'areas creada correctamente.');
         }
 
-        return back()->withErrors('Error al conectar con la API para crear el área.')->withInput();
+        return redirect()->route('area.index')->with('success', 'Área creada correctamente.');
     }
 
-    /**
-     * Mostrar los detalles de un área específica consumiendo la API.
-     */
+
+    //Mostrar los detalles de un área específica consumiendo la API.
+
     public function show($id)
     {
         $url = env('URL_SERVER_API');
@@ -72,9 +72,9 @@ class AreaController extends Controller
         return view('areas.show', compact('area'));
     }
 
-    /**
-     * Mostrar el formulario para editar un área existente.
-     */
+
+    //Mostrar el formulario para editar un área existente.
+
     public function edit($id)
     {
         $url = env('URL_SERVER_API');
@@ -85,9 +85,9 @@ class AreaController extends Controller
         return view('areas.edit', compact('area'));
     }
 
-    /**
-     * Actualizar un área existente en la API.
-     */
+
+    //Actualizar un área existente en la API.
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -106,9 +106,9 @@ class AreaController extends Controller
         return back()->withErrors('Error al actualizar el área en la API.')->withInput();
     }
 
-    /**
-     * Eliminar un área de la API.
-     */
+
+    //Eliminar un área de la API.
+
     public function destroy($id)
     {
         $url = env('URL_SERVER_API');
