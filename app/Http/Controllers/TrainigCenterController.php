@@ -22,12 +22,20 @@ class TrainigCenterController extends Controller
     public function index()
     {
         $url = env('URL_SERVER_API');
-        $trainigCenters = $this->fetchDataFromApi($url . '/training-centers');
+        $response = $this->fetchDataFromApi($url . '/training-centers');
 
-        return response()->json([
-            'success' => true,
-            'data' => $trainigCenters
-        ], 200);
+        // Si la respuesta es nula o no es arreglo, retorna un arreglo vacío para evitar errores
+        $trainigCenters = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('training-centers.index', compact('trainigCenters'));
+    }
+
+    /**
+     * Mostrar el formulario para registrar un nuevo centro de formación.
+     */
+    public function create()
+    {
+        return view('training-centers.create');
     }
 
     /**
@@ -35,7 +43,6 @@ class TrainigCenterController extends Controller
      */
     public function store(Request $request)
     {
-        // Validar los datos que llegan
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
@@ -47,7 +54,11 @@ class TrainigCenterController extends Controller
             'location' => $request->location,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('trainig-center.index')->with('success', 'Centro de formación creado correctamente.');
+        }
+
+        return back()->withErrors('Error al registrar el centro de formación en la API.')->withInput();
     }
 
     /**
@@ -56,12 +67,24 @@ class TrainigCenterController extends Controller
     public function show($id)
     {
         $url = env('URL_SERVER_API');
-        $trainigCenter = $this->fetchDataFromApi($url . '/training-centers/' . $id);
+        $response = $this->fetchDataFromApi($url . '/training-centers/' . $id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $trainigCenter
-        ], 200);
+        $trainigCenter = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('training-centers.show', compact('trainigCenter'));
+    }
+
+    /**
+     * Mostrar el formulario para editar un centro de formación existente.
+     */
+    public function edit($id)
+    {
+        $url = env('URL_SERVER_API');
+        $response = $this->fetchDataFromApi($url . '/training-centers/' . $id);
+
+        $trainigCenter = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('training-centers.edit', compact('trainigCenter'));
     }
 
     /**
@@ -80,7 +103,11 @@ class TrainigCenterController extends Controller
             'location' => $request->location,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('trainig-center.index')->with('success', 'Centro de formación actualizado correctamente.');
+        }
+
+        return back()->withErrors('Error al actualizar el centro de formación en la API.')->withInput();
     }
 
     /**
@@ -91,6 +118,6 @@ class TrainigCenterController extends Controller
         $url = env('URL_SERVER_API');
         $response = Http::delete($url . '/training-centers/' . $id);
 
-        return response()->json($response->json(), $response->status());
+        return redirect()->route('trainig-center.index')->with('success', 'Centro de formación eliminado correctamente.');
     }
 }

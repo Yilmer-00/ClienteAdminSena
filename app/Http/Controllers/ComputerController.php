@@ -19,15 +19,23 @@ class ComputerController extends Controller
     /**
      * Mostrar una lista de todos los computadores consumiendo la API.
      */
-    public function index() // Ejemplo: env('URL_SERVER_API') . '/computers'
+    public function index()
     {
         $url = env('URL_SERVER_API');
-        $computers = $this->fetchDataFromApi($url . '/computers');
+        $response = $this->fetchDataFromApi($url . '/computers');
 
-        return response()->json([
-            'success' => true,
-            'data' => $computers
-        ], 200);
+        // Extrae los datos asegurando compatibilidad y previniendo errores si es null
+        $computers = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('computers.index', compact('computers'));
+    }
+
+    /**
+     * Mostrar el formulario para registrar un nuevo computador.
+     */
+    public function create()
+    {
+        return view('computers.create');
     }
 
     /**
@@ -61,7 +69,11 @@ class ComputerController extends Controller
             'brand' => $request->brand,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('computer.index')->with('success', 'Computador creado correctamente.');
+        }
+
+        return back()->withErrors('Error al registrar el computador en la API.')->withInput();
     }
 
     /**
@@ -70,12 +82,24 @@ class ComputerController extends Controller
     public function show($id)
     {
         $url = env('URL_SERVER_API');
-        $computer = $this->fetchDataFromApi($url . '/computers/' . $id);
+        $response = $this->fetchDataFromApi($url . '/computers/' . $id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $computer
-        ], 200);
+        $computer = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('computers.show', compact('computer'));
+    }
+
+    /**
+     * Mostrar el formulario para editar un computador existente.
+     */
+    public function edit($id)
+    {
+        $url = env('URL_SERVER_API');
+        $response = $this->fetchDataFromApi($url . '/computers/' . $id);
+
+        $computer = is_array($response) ? ($response['data'] ?? $response) : [];
+
+        return view('computers.edit', compact('computer'));
     }
 
     /**
@@ -109,7 +133,11 @@ class ComputerController extends Controller
             'brand' => $request->brand,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('computer.index')->with('success', 'Computador actualizado correctamente.');
+        }
+
+        return back()->withErrors('Error al actualizar el computador en la API.')->withInput();
     }
 
     /**
@@ -120,6 +148,6 @@ class ComputerController extends Controller
         $url = env('URL_SERVER_API');
         $response = Http::delete($url . '/computers/' . $id);
 
-        return response()->json($response->json(), $response->status());
+        return redirect()->route('computer.index')->with('success', 'Computador eliminado correctamente.');
     }
 }

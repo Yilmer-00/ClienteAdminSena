@@ -22,12 +22,20 @@ class AreaController extends Controller
     public function index()
     {
         $url = env('URL_SERVER_API');
-        $areas = $this->fetchDataFromApi($url . '/areas');
+        $response = $this->fetchDataFromApi($url . '/areas');
 
-        return response()->json([
-            'success' => true,
-            'data' => $areas
-        ], 200);
+        // Extrae los datos de forma segura (si viene envuelto en 'data' o directo)
+        $areas = is_array($response) && isset($response['data']) ? $response['data'] : ($response ?? []);
+
+        return view('areas.index', compact('areas'));
+    }
+
+    /**
+     * Mostrar el formulario para registrar una nueva área.
+     */
+    public function create()
+    {
+        return view('areas.create');
     }
 
     /**
@@ -35,7 +43,6 @@ class AreaController extends Controller
      */
     public function store(Request $request)
     {
-        // Validamos que el nombre sea obligatorio
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -45,7 +52,11 @@ class AreaController extends Controller
             'name' => $request->name,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('area.index')->with('success', 'Área creada correctamente.');
+        }
+
+        return back()->withErrors('Error al conectar con la API para crear el área.')->withInput();
     }
 
     /**
@@ -54,12 +65,24 @@ class AreaController extends Controller
     public function show($id)
     {
         $url = env('URL_SERVER_API');
-        $area = $this->fetchDataFromApi($url . '/areas/' . $id);
+        $response = $this->fetchDataFromApi($url . '/areas/' . $id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $area
-        ], 200);
+        $area = is_array($response) && isset($response['data']) ? $response['data'] : $response;
+
+        return view('areas.show', compact('area'));
+    }
+
+    /**
+     * Mostrar el formulario para editar un área existente.
+     */
+    public function edit($id)
+    {
+        $url = env('URL_SERVER_API');
+        $response = $this->fetchDataFromApi($url . '/areas/' . $id);
+
+        $area = is_array($response) && isset($response['data']) ? $response['data'] : $response;
+
+        return view('areas.edit', compact('area'));
     }
 
     /**
@@ -76,7 +99,11 @@ class AreaController extends Controller
             'name' => $request->name,
         ]);
 
-        return response()->json($response->json(), $response->status());
+        if ($response->successful()) {
+            return redirect()->route('area.index')->with('success', 'Área actualizada correctamente.');
+        }
+
+        return back()->withErrors('Error al actualizar el área en la API.')->withInput();
     }
 
     /**
@@ -87,6 +114,6 @@ class AreaController extends Controller
         $url = env('URL_SERVER_API');
         $response = Http::delete($url . '/areas/' . $id);
 
-        return response()->json($response->json(), $response->status());
+        return redirect()->route('area.index')->with('success', 'Área eliminada correctamente.');
     }
 }
