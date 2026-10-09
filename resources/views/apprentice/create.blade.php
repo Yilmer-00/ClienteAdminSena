@@ -50,28 +50,19 @@
                     <!-- Nombre -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">Nombre Completo:</label>
-                        <input type="text" name="name" value="{{ old('name') }}" class="form-control shadow-sm @error('name') is-invalid @enderror" placeholder="Ej. Juan Pérez" required>
-                        @error('name')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="name" value="{{ old('name') }}" class="form-control shadow-sm" placeholder="Ej. Juan Pérez" required>
                     </div>
 
                     <!-- Email -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">Correo Electrónico:</label>
-                        <input type="email" name="email" value="{{ old('email') }}" class="form-control shadow-sm @error('email') is-invalid @enderror" placeholder="ejemplo@misena.edu.co" required>
-                        @error('email')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <input type="email" name="email" value="{{ old('email') }}" class="form-control shadow-sm" placeholder="ejemplo@misena.edu.co" required>
                     </div>
 
                     <!-- Celular -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">Número de Celular:</label>
-                        <input type="text" name="cell_number" value="{{ old('cell_number') }}" class="form-control shadow-sm @error('cell_number') is-invalid @enderror" placeholder="3001234567" required>
-                        @error('cell_number')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="cell_number" value="{{ old('cell_number') }}" class="form-control shadow-sm" placeholder="3001234567" required>
                     </div>
                 </div>
 
@@ -82,7 +73,7 @@
                     <!-- Curso asignado -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">Curso Asignado (Ficha):</label>
-                        <select name="course_id" class="form-select shadow-sm @error('course_id') is-invalid @enderror" required>
+                        <select name="course_id" class="form-select shadow-sm" required>
                             <option value="">-- Seleccione Curso --</option>
                             @foreach($courses as $course)
                             <option value="{{ $course['id'] }}" {{ old('course_id') == $course['id'] ? 'selected' : '' }}>
@@ -90,15 +81,12 @@
                             </option>
                             @endforeach
                         </select>
-                        @error('course_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
 
                     <!-- Computador asignado -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">Computador Asignado:</label>
-                        <select name="computer_id" class="form-select shadow-sm @error('computer_id') is-invalid @enderror" required>
+                        <select name="computer_id" class="form-select shadow-sm" required>
                             <option value="">-- Seleccione Computador --</option>
                             @foreach($computers as $computer)
                             <option value="{{ $computer['id'] }}" {{ old('computer_id') == $computer['id'] ? 'selected' : '' }}>
@@ -106,9 +94,6 @@
                             </option>
                             @endforeach
                         </select>
-                        @error('computer_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
                 </div>
 

@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="text-muted fw-bold">Módulo de Inventario PC</span>
         <a href="{{ route('computer.create') }}" class="btn btn-success btn-sm shadow-sm" style="background-color: #39A900; border: none;">
-            ➕ Registrar Computador
+            + Registrar Computador
         </a>
     </div>
 
@@ -23,7 +23,7 @@
     <div class="card shadow border-0">
         <!-- Encabezado con el Verde SENA -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">💻 Listado de Computadores</h4>
+            <h4 class="mb-0 fw-bold"> Listado de Computadores</h4>
         </div>
 
         <div class="card-body p-0">
@@ -72,7 +72,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header bg-light">
                                                 <h5 class="modal-title fw-bold text-success" id="imageModalLabel{{ $computer['id'] }}">
-                                                    💻 Computador N° {{ $computer['number'] }} ({{ $computer['brand'] }})
+                                                    Computador N° {{ $computer['number'] }} ({{ $computer['brand'] }})
                                                 </h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>

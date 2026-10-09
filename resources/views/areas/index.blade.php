@@ -8,7 +8,7 @@
         <span class="text-muted fw-bold">Módulo de Áreas</span>
         <!-- Botón para ir al formulario de creación -->
         <a href="{{ route('area.create') }}" class="btn btn-success btn-sm shadow-sm" style="background-color: #39A900; border: none;">
-            ➕ Registrar Nueva Área
+            + Registrar Nueva Área
         </a>
     </div>
 
@@ -24,7 +24,7 @@
     <div class="card shadow border-0">
         <!-- Encabezado de la Tarjeta -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">📋 Listado de Áreas Registradas</h4>
+            <h4 class="mb-0 fw-bold"> Listado de Áreas Registradas</h4>
         </div>
 
         <div class="card-body p-0">

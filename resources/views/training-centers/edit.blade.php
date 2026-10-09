@@ -27,7 +27,7 @@
     <div class="card shadow border-0">
         <!-- Encabezado con el Verde SENA -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">✏️ Editar Computador</h4>
+            <h4 class="mb-0 fw-bold"> Editar Computador</h4>
         </div>
 
         <div class="card-body p-4 bg-light">
@@ -101,7 +101,7 @@
                 <!-- Botón de Actualización -->
                 <div class="text-end border-top pt-3">
                     <button type="submit" class="btn btn-success px-4 shadow" style="background-color: #39A900; border: none;">
-                        💾 Actualizar Computador
+                        Actualizar Computador
                     </button>
                 </div>
 

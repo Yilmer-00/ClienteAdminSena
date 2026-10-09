@@ -27,7 +27,7 @@
     <div class="card shadow border-0">
         <!-- Encabezado con el Verde SENA -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">✏️ Editar Área</h4>
+            <h4 class="mb-0 fw-bold"> Editar Área</h4>
         </div>
 
         <div class="card-body p-4 bg-light">
@@ -37,7 +37,7 @@
                 @method('PUT') <!-- Directiva requerida por Laravel para actualizar -->
 
                 <!-- Sección: Información del Área -->
-                <h5 class="text-success mb-3 border-bottom pb-2">📂 Datos del Área</h5>
+                <h5 class="text-success mb-3 border-bottom pb-2"> Datos del Área</h5>
 
                 <div class="mb-4">
                     <!-- Nombre del Área con su valor actual cargado desde la API -->
@@ -56,7 +56,7 @@
                 <!-- Botón de Actualización -->
                 <div class="text-end border-top pt-3">
                     <button type="submit" class="btn btn-success px-4 shadow" style="background-color: #39A900; border: none;">
-                        💾 Actualizar Área
+                        Actualizar Área
                     </button>
                 </div>
 

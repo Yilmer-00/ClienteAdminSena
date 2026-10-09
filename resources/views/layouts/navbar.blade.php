@@ -2,7 +2,7 @@
     <div class="container">
         <!-- Logo / Título Principal -->
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url('/') }}">
-            <span class="me-2 fs-5">"cliente"</span> AdminSENA
+            <span class="me-2 fs-5">Cliente</span> AdminSENA
         </a>
 
         <!-- Botón hamburguesa para dispositivos móviles -->
@@ -17,7 +17,7 @@
                 <!-- Módulo de Áreas -->
                 <li class="nav-item">
                     <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('area.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('area.index') }}">
-                        Áreas
+                        Areas
                     </a>
                 </li>
 

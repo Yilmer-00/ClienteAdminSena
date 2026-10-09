@@ -9,7 +9,7 @@
     <div class="card shadow-sm border-0">
         <!-- Encabezado con el Verde SENA -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">🔍 Especificaciones del Computador</h4>
+            <h4 class="mb-0 fw-bold"> Especificaciones del Computador</h4>
         </div>
 
         <div class="card-body p-4">

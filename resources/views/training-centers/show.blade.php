@@ -8,10 +8,10 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">🏢 Detalle del Centro de Formación</h4>
+            <h4 class="mb-0 fw-bold"> Detalle del Centro de Formación</h4>
         </div>
         <div class="card-body p-4">
-            <h5 class="text-success mb-3 border-bottom pb-2">📋 Información General</h5>
+            <h5 class="text-success mb-3 border-bottom pb-2"> Información General</h5>
 
             <div class="row mb-3">
                 <div class="col-sm-4 fw-bold text-muted">Nombre del Centro:</div>
