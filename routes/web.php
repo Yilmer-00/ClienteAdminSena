@@ -5,6 +5,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\TrainigCenterController;
 use App\Http\Controllers\ApprenticeController;
+use App\Http\Controllers\CourseController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,3 +45,12 @@ Route::get('/apprentices/{id}', [ApprenticeController::class, 'show'])->name('ap
 Route::get('/apprentices/{id}/edit', [ApprenticeController::class, 'edit'])->name('apprentice.edit');
 Route::put('/apprentices/{id}', [ApprenticeController::class, 'update'])->name('apprentice.update');
 Route::delete('/apprentices/{id}', [ApprenticeController::class, 'destroy'])->name('apprentice.destroy');
+
+Route::get('/courses', [CourseController::class, 'index'])->name('course.index');
+Route::get('/courses/create', [CourseController::class, 'create'])->name('course.create');
+Route::post('/courses', [CourseController::class, 'store'])->name('course.store');
+Route::get('/courses/{id}', [CourseController::class, 'show'])->name('course.show');
+Route::get('/courses/{id}/edit', [CourseController::class, 'edit'])->name('course.edit');
+Route::put('/courses/{id}', [CourseController::class, 'update'])->name('course.update');
+Route::delete('/courses/{id}', [CourseController::class, 'destroy'])->name('course.destroy');
+

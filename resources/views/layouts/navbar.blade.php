@@ -34,6 +34,18 @@
                         Inventario PC
                     </a>
                 </li>
+                <!-- Módulo de Aprendices -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('apprentice.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('apprentice.index') }}">
+                        Aprendices
+                    </a>
+                </li>
+                <!-- Módulo de Cursos -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('course.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('course.index') }}">
+                        Cursos
+                    </a>
+                </li>
 
             </ul>
         </div>
