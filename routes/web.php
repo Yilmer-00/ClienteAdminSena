@@ -6,6 +6,8 @@ use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\TrainigCenterController;
 use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\CourseTeacherController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,4 +55,21 @@ Route::get('/courses/{id}', [CourseController::class, 'show'])->name('course.sho
 Route::get('/courses/{id}/edit', [CourseController::class, 'edit'])->name('course.edit');
 Route::put('/courses/{id}', [CourseController::class, 'update'])->name('course.update');
 Route::delete('/courses/{id}', [CourseController::class, 'destroy'])->name('course.destroy');
+
+Route::get('/teachers', [TeacherController::class, 'index'])->name('teacher.index');
+Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teacher.create');
+Route::post('/teachers', [TeacherController::class, 'store'])->name('teacher.store');
+Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teacher.show');
+Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teacher.edit');
+Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teacher.update');
+Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teacher.destroy');
+
+Route::get('/course-teachers', [CourseTeacherController::class, 'index'])->name('course_teacher.index');
+Route::get('/course-teachers/create', [CourseTeacherController::class, 'create'])->name('course_teacher.create');
+Route::post('/course-teachers', [CourseTeacherController::class, 'store'])->name('course_teacher.store');
+Route::get('/course-teachers/{id}', [CourseTeacherController::class, 'show'])->name('course_teacher.show');
+Route::get('/course-teachers/{id}/edit', [CourseTeacherController::class, 'edit'])->name('course_teacher.edit');
+Route::put('/course-teachers/{id}', [CourseTeacherController::class, 'update'])->name('course_teacher.update');
+Route::delete('/course-teachers/{id}', [CourseTeacherController::class, 'destroy'])->name('course_teacher.destroy');
+
 

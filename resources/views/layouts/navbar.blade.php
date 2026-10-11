@@ -46,6 +46,18 @@
                         Cursos
                     </a>
                 </li>
+                <!-- Módulo de Instructores -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('teacher.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('teacher.index') }}">
+                        Instructores
+                    </a>
+                </li>
+                <!-- Módulo de Asignaciones de Cursos -->
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('course_teacher.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('course_teacher.index') }}">
+                        Asignaciones
+                    </a>
+                </li>
 
             </ul>
         </div>

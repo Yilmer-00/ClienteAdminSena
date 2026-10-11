@@ -94,7 +94,7 @@
                         <label class="form-label fw-bold text-muted">Centro de Formación:</label>
                         <select name="training_center_id" class="form-select shadow-sm @error('training_center_id') is-invalid @enderror" required>
                             <option value="">Seleccione un centro...</option>
-                            @foreach($trainig_centers as $center)
+                            @foreach($trainigCenters as $center)
                             <option value="{{ $center['id'] }}" {{ (old('training_center_id', $course['training_center_id'] ?? '') == $center['id']) ? 'selected' : '' }}>
                                 {{ $center['name'] }}
                             </option>

@@ -82,7 +82,7 @@
                         <label class="form-label fw-bold text-muted">Centro de Formación:</label>
                         <select name="training_center_id" class="form-select shadow-sm" required>
                             <option value="">-- Seleccione Centro --</option>
-                            @foreach($trainig_centers as $center)
+                            @foreach($trainigCenters as $center)
                                 <option value="{{ $center['id'] }}" {{ old('training_center_id') == $center['id'] ? 'selected' : '' }}>
                                     {{ $center['name'] }}
                                 </option>
@@ -94,7 +94,7 @@
                 <!-- Botón de Registro -->
                 <div class="text-end border-top pt-3">
                     <button type="submit" class="btn btn-success px-4 shadow" style="background-color: #39A900; border: none;">
-                        💾 Guardar Curso
+                        Guardar Curso
                     </button>
                 </div>
 
