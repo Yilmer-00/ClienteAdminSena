@@ -8,6 +8,7 @@ use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\CourseTeacherController;
+use App\Http\Controllers\FormacionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -72,4 +73,10 @@ Route::get('/course-teachers/{id}/edit', [CourseTeacherController::class, 'edit'
 Route::put('/course-teachers/{id}', [CourseTeacherController::class, 'update'])->name('course_teacher.update');
 Route::delete('/course-teachers/{id}', [CourseTeacherController::class, 'destroy'])->name('course_teacher.destroy');
 
+Route::resource('/formaciones', FormacionController::class)->only(['index', 'create', 'store']);
 
+// 2. Rutas personalizadas (que no forman parte del resource estándar)
+Route::get('/formaciones/{id}/evaluar', [FormacionController::class, 'evaluarAspirantes'])->name('formaciones.evaluar');
+
+Route::put('/formaciones/aspirantes/{id}/aprobar', [FormacionController::class, 'aprobarAspirante'])->name('formaciones.aprobar');
+Route::put('/formaciones/aspirantes/{id}/rechazar', [FormacionController::class, 'rechazarAspirante'])->name('formaciones.rechazar');
