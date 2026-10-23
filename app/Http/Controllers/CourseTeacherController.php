@@ -82,10 +82,7 @@ class CourseTeacherController extends Controller
     {
         $url = env('URL_SERVER_API');
 
-        Http::post(
-            $url . '/course-teachers',
-            $request->all()
-        );
+        Http::post($url . '/course-teachers',$request->all());
 
         return redirect()->route('course_teacher.index');
     }
@@ -95,21 +92,14 @@ class CourseTeacherController extends Controller
     {
         $url = env('URL_SERVER_API');
 
-        $courseTeacher = $this->fetchDataFromApi(
-            $url . '/course-teachers/' . $id
-        );
+        $courseTeacher = $this->fetchDataFromApi( $url . '/course-teachers/' . $id);
 
-        $options = $this->fetchDataFromApi(
-            $url . '/course-teachers/options'
-        );
+        $options = $this->fetchDataFromApi($url . '/course-teachers/options');
 
         $courses = $options['data']['courses'] ?? [];
         $teachers = $options['data']['teachers'] ?? [];
 
-        return view(
-            'course_teacher.edit',
-            compact('courseTeacher', 'courses', 'teachers')
-        );
+        return view('course_teacher.edit',compact('courseTeacher', 'courses', 'teachers'));
     }
 
     // Actualizar una asignación
@@ -117,10 +107,7 @@ class CourseTeacherController extends Controller
     {
         $url = env('URL_SERVER_API');
 
-        Http::put(
-            $url . '/course-teachers/' . $id,
-            $request->all()
-        );
+        Http::put($url . '/course-teachers/' . $id, $request->all());
 
         return redirect()->route('course_teacher.index');
     }
@@ -130,9 +117,7 @@ class CourseTeacherController extends Controller
     {
         $url = env('URL_SERVER_API');
 
-        Http::delete(
-            $url . '/course-teachers/' . $id
-        );
+        Http::delete( $url . '/course-teachers/' . $id );
 
         return redirect()->route('course_teacher.index');
     }

@@ -22,7 +22,6 @@ class CourseController extends Controller
 
         $response = $this->fetchDataFromApi($url . '/courses');
 
-        // Extraer los cursos de forma segura.
         $courses = is_array($response)
             ? ($response['data'] ?? $response)
             : [];
@@ -35,9 +34,7 @@ class CourseController extends Controller
     {
         $url = env('URL_SERVER_API');
 
-        $response = $this->fetchDataFromApi(
-            $url . '/courses/' . $id
-        );
+        $response = $this->fetchDataFromApi($url . '/courses/' . $id);
 
         $course = is_array($response)
             ? ($response['data'] ?? $response)

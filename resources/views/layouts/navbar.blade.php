@@ -59,11 +59,6 @@
                     </a>
                 </li>
                 <!-- Módulo de Asignaciones de formacion -->
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold px-3 py-2 rounded transition {{ request()->routeIs('formaciones.*') ? 'bg-white text-success shadow-sm' : 'text-white' }}" href="{{ route('formaciones.index') }}">
-                        Formaciones
-                    </a>
-                </li>
 
             </ul>
         </div>

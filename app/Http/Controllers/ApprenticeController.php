@@ -7,18 +7,14 @@ use Illuminate\Support\Facades\Http;
 
 class ApprenticeController extends Controller
 {
-    /**
-     * Método privado para manejar llamadas HTTP repetitivas (GET)
-     */
+
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
         return $response->json();
     }
 
-    /**
-     * Mostrar el listado de todos los aprendices.
-     */
+
     public function index()
     {
         $url = env('URL_SERVER_API');
@@ -30,9 +26,7 @@ class ApprenticeController extends Controller
         return view('apprentice.index', compact('apprentices'));
     }
 
-    /**
-     * Mostrar los detalles de un aprendiz específico.
-     */
+
     public function show($id)
     {
         $url = env('URL_SERVER_API');
@@ -43,9 +37,7 @@ class ApprenticeController extends Controller
         return view('apprentice.show', compact('apprentice'));
     }
 
-    /**
-     * Mostrar el formulario de creación cargando cursos y computadores.
-     */
+
     public function create()
     {
         $url = env('URL_SERVER_API');
@@ -60,9 +52,7 @@ class ApprenticeController extends Controller
         return view('apprentice.create', compact('courses', 'computers'));
     }
 
-    /**
-     * Almacenar un nuevo aprendiz enviándolo a la API.
-     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -83,9 +73,7 @@ class ApprenticeController extends Controller
         return back()->withErrors('Error al registrar el aprendiz en la API.')->withInput();
     }
 
-    /**
-     * Mostrar el formulario de edición con sus datos y las foráneas.
-     */
+
     public function edit($id)
     {
         $url = env('URL_SERVER_API');
@@ -104,9 +92,7 @@ class ApprenticeController extends Controller
         return view('apprentice.edit', compact('apprentice', 'courses', 'computers'));
     }
 
-    /**
-     * Actualizar un aprendiz existente en la API.
-     */
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -127,9 +113,7 @@ class ApprenticeController extends Controller
         return back()->withErrors('Error al actualizar el aprendiz en la API.')->withInput();
     }
 
-    /**
-     * Eliminar un aprendiz de la API.
-     */
+
     public function destroy($id)
     {
         $url = env('URL_SERVER_API');
