@@ -5,7 +5,7 @@
 
     <!-- Botones de Navegación Rápida -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ url('/teacher/list') }}" class="btn btn-secondary btn-sm shadow-sm">
+        <a href="{{ url('/teachers') }}" class="btn btn-secondary btn-sm shadow-sm">
             ← Volver al Listado
         </a>
         <span class="text-muted fw-bold">Módulo de Instructores</span>
@@ -24,7 +24,7 @@
     @endif
 
     <!-- Alerta de Advertencia si la API no responde -->
-    @if(empty($teacher) || empty($areas) || empty($trainingCenters))
+    @if(empty($teacher) || empty($areas) || empty($trainigCenters))
     <div class="alert alert-warning alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
         <strong>Atención:</strong> No se pudo recuperar toda la información requerida desde la API externa.
     </div>
@@ -99,20 +99,41 @@
                     </div>
 
                     <!-- Selección de Centro de Formación -->
+                    <!-- Selección de Centro de Formación -->
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted">Centro de Formación:</label>
-                        <select name="trainig_center_id" class="form-select shadow-sm @error('trainig_center_id') is-invalid @enderror" required>
+                        <label class="form-label fw-bold text-muted">
+                            Centro de Formación:
+                        </label>
+
+                        <select
+                            name="trainig_center_id"
+                            class="form-select shadow-sm @error('trainig_center_id') is-invalid @enderror"
+                            required>
                             <option value="">Seleccione un centro...</option>
-                            @if(!empty($trainingCenters) && is_iterable($trainingCenters))
-                            @foreach($trainingCenters as $center)
-                            <option value="{{ $center['id'] ?? '' }}" @selected(old('trainig_center_id', $teacher['trainig_center_id'] ?? ($teacher['training_center_id'] ?? '' ))==($center['id'] ?? '' ))>
-                                {{ $center['name'] ?? 'Centro sin nombre' }}
+
+                            @if(!empty($trainigCenters) && is_iterable($trainigCenters))
+
+                            @foreach($trainigCenters as $center)
+
+                            <option
+                                value="{{ $center['id'] }}"
+                                @selected(
+                                old( 'trainig_center_id' ,
+                                $teacher['trainig_center_id'] ?? ''
+                                )==$center['id']
+                                )>
+                                {{ $center['name'] }}
                             </option>
+
                             @endforeach
+
                             @endif
                         </select>
+
                         @error('trainig_center_id')
-                        <div class="invalid-feedback fw-bold">⚠️ {{ $message }}</div>
+                        <div class="invalid-feedback fw-bold">
+                            ⚠️ {{ $message }}
+                        </div>
                         @enderror
                     </div>
                 </div>

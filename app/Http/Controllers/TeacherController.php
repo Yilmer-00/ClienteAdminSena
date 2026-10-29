@@ -116,72 +116,58 @@ class TeacherController extends Controller
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $teacherResponse = $this->fetchDataFromApi(
-            $url . '/teachers/' . $id
-        );
+        // Obtener docente
+        $teacherResponse = Http::get($url . '/teachers/' . $id);
 
-        $teacher = is_array($teacherResponse)
-            ? ($teacherResponse['data'] ?? $teacherResponse)
-            : [];
+        // Obtener áreas
+        $areasResponse = Http::get($url . '/areas');
 
-        $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
-        );
+        // Obtener centros
+        $centersResponse = Http::get($url . '/training-centers');
 
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
+        if (
+            !$teacherResponse->successful() ||
+            !$areasResponse->successful() ||
+            !$centersResponse->successful()
+        ) {
+            return back()->withErrors([
+                'api' => 'No se pudo recuperar toda la información requerida desde la API externa.'
+            ]);
+        }
 
-        $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
-        );
+        $teacher = $teacherResponse->json('data') ?? [];
+        $areas = $areasResponse->json('data') ?? [];
+        $trainigCenters = $centersResponse->json('data') ?? [];
 
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
-
-        return view(
-            'teacher.edit',
-            compact('teacher', 'areas', 'trainigCenters')
-        );
+        return view('teacher.edit', compact(
+            'teacher',
+            'areas',
+            'trainigCenters'
+        ));
     }
-
 
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name'      => 'required',
-            'email'                => 'required',
-            'area_id'            => 'required|integer',
-            'training_center_id' => 'required|integer',
-            'image'              => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'area_id' => 'required|integer',
+            'trainig_center_id' => 'required|integer',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
         $data = [
-            'name'      => $request->input('name'),
-            'email'                => $request->input('email'),
-            'area_id'            => $request->input('area_id'),
-            'training_center_id' => $request->input('training_center_id'),
-            '_method'            => 'PUT',
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'area_id' => $request->input('area_id'),
+            'trainig_center_id' => $request->input('trainig_center_id'),
         ];
 
-        $http = Http::asMultipart();
-
-        $multipartData = [];
-
-        foreach ($data as $key => $value) {
-            $multipartData[] = [
-                'name' => $key,
-                'contents' => (string) $value,
-            ];
-        }
-
-        $response = $http->post(
+        $response = Http::put(
             $url . '/teachers/' . $id,
-            $multipartData
+            $data
         );
 
         if ($response->successful()) {
@@ -192,8 +178,8 @@ class TeacherController extends Controller
 
         return back()
             ->withErrors([
-                'api' => 'Error al actualizar el docente en la API: '
-                    . $response->body(),
+                'api' => 'Error al actualizar el docente: ' .
+                    ($response->json('message') ?? $response->body()),
             ])
             ->withInput();
     }

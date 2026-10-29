@@ -2,40 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class CourseTeacherController extends Controller
 {
-    // Método privado para manejar llamadas HTTP repetitivas
+    // Dirección base de la API
+    private function apiUrl()
+    {
+        return rtrim(env('URL_SERVER_API'), '/');
+    }
+
+    // Consultar información de la API
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
-        return $response->json();
+
+        if ($response->failed()) {
+            return [
+                'success' => false,
+                'status' => $response->status(),
+                'message' => $response->body(),
+                'data' => [],
+            ];
+        }
+
+        return $response->json() ?? [];
     }
 
-    // Listar todas las asignaciones curso-docente
-
+    // Listar asignaciones curso-docente
     public function index()
     {
-        $url = rtrim(env('URL_SERVER_API'), '/');
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/course-teachers'
+        );
 
-        $response = Http::get($url . '/course-teachers');
-
-        // Comprobar si la API respondió correctamente
-        if ($response->failed()) {
-            dd([
-                'error' => 'La API no pudo devolver las asignaciones.',
-                'status' => $response->status(),
-                'respuesta' => $response->body(),
+        if (!($response['success'] ?? false)) {
+            return back()->withErrors([
+                'api' => 'No se pudieron recuperar las asignaciones curso-docente.'
             ]);
         }
 
-        // Obtener el JSON de la API
-        $result = $response->json();
-
-        // Extraer la lista de asignaciones
-        $courseTeachers = $result['data'] ?? [];
+        $courseTeachers = $response['data'] ?? [];
 
         return view(
             'course_teacher.index',
@@ -43,15 +51,20 @@ class CourseTeacherController extends Controller
         );
     }
 
-
-    // Mostrar los detalles de una asignación
+    // Mostrar detalles de una asignación
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
-
-        $courseTeacher = $this->fetchDataFromApi(
-            $url . '/course-teachers/' . $id
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/course-teachers/' . $id
         );
+
+        if (!($response['success'] ?? false)) {
+            return back()->withErrors([
+                'api' => 'No se pudo recuperar la información de la asignación.'
+            ]);
+        }
+
+        $courseTeacher = $response['data'] ?? [];
 
         return view(
             'course_teacher.show',
@@ -59,17 +72,33 @@ class CourseTeacherController extends Controller
         );
     }
 
-    // Mostrar el formulario de registro con cursos y docentes
-    public function create()
+    // Consultar cursos y docentes para los formularios
+    private function getOptions()
     {
-        $url = env('URL_SERVER_API');
-
-        $options = $this->fetchDataFromApi(
-            $url . '/course-teachers/options'
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/course-teachers/options'
         );
 
-        $courses = $options['data']['courses'] ?? [];
-        $teachers = $options['data']['teachers'] ?? [];
+        if (!($response['success'] ?? false)) {
+            return null;
+        }
+
+        return $response['data'] ?? [];
+    }
+
+    // Mostrar formulario de registro
+    public function create()
+    {
+        $options = $this->getOptions();
+
+        if ($options === null) {
+            return back()->withErrors([
+                'api' => 'No se pudieron recuperar los cursos y docentes.'
+            ]);
+        }
+
+        $courses = $options['courses'] ?? [];
+        $teachers = $options['teachers'] ?? [];
 
         return view(
             'course_teacher.create',
@@ -77,34 +106,56 @@ class CourseTeacherController extends Controller
         );
     }
 
-    // Registrar una nueva asignación
+    // Registrar asignación
     public function store(Request $request)
     {
-        $url = env('URL_SERVER_API');
-
-        Http::post(
-            $url . '/course-teachers',
-            $request->all()
+        $response = Http::post(
+            $this->apiUrl() . '/course-teachers',
+            $request->except('_token')
         );
 
-        return redirect()->route('course_teacher.index');
+        if (
+            $response->successful() &&
+            ($response->json('success') ?? true)
+        ) {
+
+            return redirect()
+                ->route('course_teacher.index')
+                ->with('success', 'Asignación registrada correctamente.');
+        }
+
+        return back()
+            ->withErrors([
+                'api' => 'Error al registrar la asignación: ' .
+                    ($response->json('message') ?? $response->body())
+            ])
+            ->withInput();
     }
 
-    // Mostrar el formulario de edición
+    // Mostrar formulario de edición
     public function edit($id)
     {
-        $url = env('URL_SERVER_API');
-
-        $courseTeacher = $this->fetchDataFromApi(
-            $url . '/course-teachers/' . $id
+        // Consultar asignación
+        $teacherResponse = $this->fetchDataFromApi(
+            $this->apiUrl() . '/course-teachers/' . $id
         );
 
-        $options = $this->fetchDataFromApi(
-            $url . '/course-teachers/options'
-        );
+        // Consultar opciones
+        $options = $this->getOptions();
 
-        $courses = $options['data']['courses'] ?? [];
-        $teachers = $options['data']['teachers'] ?? [];
+        if (
+            !($teacherResponse['success'] ?? false) ||
+            $options === null
+        ) {
+            return back()->withErrors([
+                'api' => 'No se pudo recuperar toda la información necesaria para editar la asignación.'
+            ]);
+        }
+
+        $courseTeacher = $teacherResponse['data'] ?? [];
+
+        $courses = $options['courses'] ?? [];
+        $teachers = $options['teachers'] ?? [];
 
         return view(
             'course_teacher.edit',
@@ -112,28 +163,48 @@ class CourseTeacherController extends Controller
         );
     }
 
-    // Actualizar una asignación
+    // Actualizar asignación
     public function update(Request $request, $id)
     {
-        $url = env('URL_SERVER_API');
-
-        Http::put(
-            $url . '/course-teachers/' . $id,
-            $request->all()
+        $response = Http::put(
+            $this->apiUrl() . '/course-teachers/' . $id,
+            $request->except(['_token', '_method'])
         );
 
-        return redirect()->route('course_teacher.index');
+        if (
+            $response->successful() &&
+            ($response->json('success') ?? true)
+        ) {
+
+            return redirect()
+                ->route('course_teacher.index')
+                ->with('success', 'Asignación actualizada correctamente.');
+        }
+
+        return back()
+            ->withErrors([
+                'api' => 'Error al actualizar la asignación: ' .
+                    ($response->json('message') ?? $response->body())
+            ])
+            ->withInput();
     }
 
-    // Eliminar una asignación
+    // Eliminar asignación
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
-
-        Http::delete(
-            $url . '/course-teachers/' . $id
+        $response = Http::delete(
+            $this->apiUrl() . '/course-teachers/' . $id
         );
 
-        return redirect()->route('course_teacher.index');
+        if ($response->successful()) {
+            return redirect()
+                ->route('course_teacher.index')
+                ->with('success', 'Asignación eliminada correctamente.');
+        }
+
+        return back()->withErrors([
+            'api' => 'No fue posible eliminar la asignación: ' .
+                ($response->json('message') ?? $response->body())
+        ]);
     }
 }

@@ -7,133 +7,90 @@ use Illuminate\Support\Facades\Http;
 
 class CourseController extends Controller
 {
-
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
 
-        return $response->json();
+        if (!$response->successful()) {
+            return [];
+        }
+
+        $data = $response->json();
+
+        return is_array($data) ? $data : [];
     }
 
+    private function extractData($response)
+    {
+        return is_array($response)
+            ? ($response['data'] ?? $response)
+            : [];
+    }
 
     public function index()
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
         $response = $this->fetchDataFromApi($url . '/courses');
-
-        // Extraer los cursos de forma segura.
-        $courses = is_array($response)
-            ? ($response['data'] ?? $response)
-            : [];
+        $courses = $this->extractData($response);
 
         return view('course.index', compact('courses'));
     }
 
-
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $response = $this->fetchDataFromApi(
-            $url . '/courses/' . $id
-        );
-
-        $course = is_array($response)
-            ? ($response['data'] ?? $response)
-            : [];
+        $response = $this->fetchDataFromApi($url . '/courses/' . $id);
+        $course = $this->extractData($response);
 
         return view('course.show', compact('course'));
     }
-
 
     public function create()
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
-        );
+        $areasResponse = $this->fetchDataFromApi($url . '/areas');
+        $areas = $this->extractData($areasResponse);
 
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
+        $centersResponse = $this->fetchDataFromApi($url . '/training-centers');
+        $trainigCenters = $this->extractData($centersResponse);
 
-        $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
-        );
-
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
-
-        return view(
-            'course.create',
-            compact('areas', 'trainigCenters')
-        );
+        return view('course.create', compact('areas', 'trainigCenters'));
     }
-
 
     public function store(Request $request)
     {
         $request->validate([
-            'course_number'      => 'required',
-            'day'                => 'required',
-            'area_id'            => 'required|integer',
-            'training_center_id' => 'required|integer',
-            'image'              => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'course_number' => 'required',
+            'day' => 'required',
+            'area_id' => 'required',
+            'training_center_id' => 'required',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/') . '/courses';
 
-        $data = [
-            'course_number'      => $request->input('course_number'),
-            'day'                => $request->input('day'),
-            'area_id'            => $request->input('area_id'),
-            'training_center_id' => $request->input('training_center_id'),
-        ];
+        $response = Http::asForm()->post($url, [
+            'course_number' => $request->course_number,
+            'day' => $request->day,
+            'area_id' => $request->area_id,
+            'trainig_center_id' => $request->training_center_id,
+        ]);
 
-        $http = Http::asMultipart();
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            $http = $http->attach(
-                'image',
-                file_get_contents($image->getRealPath()),
-                $image->getClientOriginalName()
-            );
-        }
-
-        $response = $http->post(
-            $url . '/courses',
-            array_merge(
-                array_map(
-                    fn($key, $value) => [
-                        'name' => $key,
-                        'contents' => (string) $value,
-                    ],
-                    array_keys($data),
-                    array_values($data)
-                ),
-                []
-            )
-        );
-
-        if ($response->successful()) {
+        if ($response->successful() && $response->json('success')) {
             return redirect()
                 ->route('course.index')
                 ->with('success', 'Curso registrado correctamente.');
         }
 
         return back()
+            ->withInput()
             ->withErrors([
-                'api' => 'Error al registrar el curso en la API: '
-                    . $response->body(),
-            ])
-            ->withInput();
+                'api' => 'Error al registrar el curso: ' .
+                    $response->body()
+            ]);
     }
-
 
     public function edit($id)
     {
@@ -143,25 +100,24 @@ class CourseController extends Controller
             $url . '/courses/' . $id
         );
 
-        $course = is_array($courseResponse)
-            ? ($courseResponse['data'] ?? $courseResponse)
-            : [];
+        $course = $this->extractData($courseResponse);
 
-        $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
-        );
+        if (empty($course)) {
+            return redirect()
+                ->route('course.index')
+                ->withErrors(['api' => 'No se encontró el curso solicitado.']);
+        }
 
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
+        $course['training_center_id'] = $course['trainig_center_id'] ?? '';
+
+        $areasResponse = $this->fetchDataFromApi($url . '/areas');
+        $areas = $this->extractData($areasResponse);
 
         $centersResponse = $this->fetchDataFromApi(
             $url . '/training-centers'
         );
 
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
+        $trainigCenters = $this->extractData($centersResponse);
 
         return view(
             'course.edit',
@@ -169,51 +125,25 @@ class CourseController extends Controller
         );
     }
 
-
-
     public function update(Request $request, $id)
     {
         $request->validate([
-            'course_number'      => 'required',
-            'day'                => 'required',
-            'area_id'            => 'required|integer',
+            'course_number' => 'required',
+            'day' => 'required',
+            'area_id' => 'required|integer',
             'training_center_id' => 'required|integer',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $data = [
-            'course_number'      => $request->input('course_number'),
-            'day'                => $request->input('day'),
-            'area_id'            => $request->input('area_id'),
-            'training_center_id' => $request->input('training_center_id'),
-            '_method'            => 'PUT',
-        ];
-
-        $http = Http::asMultipart();
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            $http = $http->attach(
-                'image',
-                file_get_contents($image->getRealPath()),
-                $image->getClientOriginalName()
-            );
-        }
-
-        $multipartData = [];
-
-        foreach ($data as $key => $value) {
-            $multipartData[] = [
-                'name' => $key,
-                'contents' => (string) $value,
-            ];
-        }
-
-        $response = $http->post(
+        $response = Http::asForm()->put(
             $url . '/courses/' . $id,
-            $multipartData
+            [
+                'course_number' => $request->input('course_number'),
+                'day' => $request->input('day'),
+                'area_id' => $request->input('area_id'),
+                'trainig_center_id' => $request->input('training_center_id'),
+            ]
         );
 
         if ($response->successful()) {
@@ -224,19 +154,16 @@ class CourseController extends Controller
 
         return back()
             ->withErrors([
-                'api' => 'Error al actualizar el curso en la API: '
-                    . $response->body(),
+                'api' => 'Error al actualizar el curso: ' . $response->body(),
             ])
             ->withInput();
     }
 
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $response = Http::delete(
-            $url . '/courses/' . $id
-        );
+        $response = Http::delete($url . '/courses/' . $id);
 
         if ($response->successful()) {
             return redirect()
@@ -245,7 +172,8 @@ class CourseController extends Controller
         }
 
         return back()->withErrors([
-            'api' => 'No fue posible eliminar el curso desde la API.',
+            'api' => 'No fue posible eliminar el curso desde la API: '
+                . $response->body(),
         ]);
     }
 }

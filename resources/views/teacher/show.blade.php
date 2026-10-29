@@ -3,7 +3,7 @@
 @section('content')
 <div class="container" style="max-width: 750px; margin-top: 30px;">
     <div class="mb-3">
-        <a href="{{ url('/teacher/list') }}" class="btn btn-secondary btn-sm">← Volver</a>
+        <a href="{{ url('/teachers') }}" class="btn btn-secondary btn-sm">← Volver</a>
     </div>
 
     <!-- Alerta de Advertencia si la API no responde o el instructor está vacío -->
