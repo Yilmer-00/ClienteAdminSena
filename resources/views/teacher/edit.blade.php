@@ -81,24 +81,25 @@
 
                 <div class="row g-3 mb-4">
                     <!-- Selección de Área -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted">Área de Especialidad:</label>
-                        <select name="area_id" class="form-select shadow-sm @error('area_id') is-invalid @enderror" required>
-                            <option value="">Seleccione un área...</option>
-                            @if(!empty($areas) && is_iterable($areas))
-                            @foreach($areas as $area)
-                            <option value="{{ $area['id'] ?? '' }}" @selected(old('area_id', $teacher['area_id'] ?? '' )==($area['id'] ?? '' ))>
-                                {{ $area['name'] ?? 'Área sin nombre' }}
-                            </option>
-                            @endforeach
-                            @endif
-                        </select>
-                        @error('area_id')
-                        <div class="invalid-feedback fw-bold">⚠️ {{ $message }}</div>
-                        @enderror
-                    </div>
+                    <select
+                        name="area_id"
+                        class="form-select @error('area_id') is-invalid @enderror"
+                        required>
 
-                    <!-- Selección de Centro de Formación -->
+                        <option value="">Seleccione un área...</option>
+
+                        @foreach($areas as $area)
+                        <option
+                            value="{{ $area['id'] }}"
+                            @selected(
+                            old('area_id', $teacher['area_id'] ?? '' )==$area['id']
+                            )>
+                            {{ $area['name'] }}
+                        </option>
+                        @endforeach
+
+                    </select>
+
                     <!-- Selección de Centro de Formación -->
                     <div class="col-md-6">
                         <label class="form-label fw-bold text-muted">
@@ -107,14 +108,12 @@
 
                         <select
                             name="trainig_center_id"
-                            class="form-select shadow-sm @error('trainig_center_id') is-invalid @enderror"
+                            class="form-select @error('trainig_center_id') is-invalid @enderror"
                             required>
+
                             <option value="">Seleccione un centro...</option>
 
-                            @if(!empty($trainigCenters) && is_iterable($trainigCenters))
-
                             @foreach($trainigCenters as $center)
-
                             <option
                                 value="{{ $center['id'] }}"
                                 @selected(
@@ -124,10 +123,8 @@
                                 )>
                                 {{ $center['name'] }}
                             </option>
-
                             @endforeach
 
-                            @endif
                         </select>
 
                         @error('trainig_center_id')

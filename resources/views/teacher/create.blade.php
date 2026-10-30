@@ -25,6 +25,20 @@
     </div>
     @endif
 
+
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <strong>No se pudo registrar el instructor:</strong>
+
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+
     <!-- Tarjeta del Formulario -->
     <div class="card shadow border-0">
         <!-- Encabezado con el Verde SENA -->

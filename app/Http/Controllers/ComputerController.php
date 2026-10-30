@@ -95,6 +95,7 @@ class ComputerController extends Controller
             : [];
 
         return view('computers.edit', compact('computer'));
+        
     }
 
 

@@ -7,64 +7,89 @@ use Illuminate\Support\Facades\Http;
 
 class TeacherController extends Controller
 {
-    private function fetchDataFromApi($url)
+    // Dirección base de la API
+    private function apiUrl()
     {
-        $response = Http::get($url);
-
-        return $response->json();
+        return rtrim((string) config('services.api.url'), '/');
     }
 
+    // Método para consultar información de la API
+    private function fetchDataFromApi($url)
+    {
+        $response = Http::acceptJson()->get($url);
 
+        if ($response->failed()) {
+            return [
+                'success' => false,
+                'status' => $response->status(),
+                'message' => $response->json('message')
+                    ?? $response->body(),
+                'errors' => $response->json('errors') ?? [],
+                'data' => [],
+            ];
+        }
+
+        return $response->json() ?? [];
+    }
+
+    // Listar docentes
     public function index()
     {
-        $url = env('URL_SERVER_API');
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/teachers'
+        );
 
-        $response = $this->fetchDataFromApi($url . '/teachers');
+        if (!($response['success'] ?? false)) {
+            return back()->withErrors([
+                'api' => 'No se pudieron recuperar los docentes.'
+            ]);
+        }
 
-        // Extraer los cursos de forma segura.
-        $teachers = is_array($response)
-            ? ($response['data'] ?? $response)
-            : [];
+        $teachers = $response['data'] ?? [];
 
         return view('teacher.index', compact('teachers'));
     }
 
-
+    // Mostrar información de un docente
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
-
         $response = $this->fetchDataFromApi(
-            $url . '/teachers/' . $id
+            $this->apiUrl() . '/teachers/' . $id
         );
 
-        $teacher = is_array($response)
-            ? ($response['data'] ?? $response)
-            : [];
+        if (!($response['success'] ?? false)) {
+            return back()->withErrors([
+                'api' => 'No se pudo recuperar la información del docente.'
+            ]);
+        }
+
+        $teacher = $response['data'] ?? [];
 
         return view('teacher.show', compact('teacher'));
     }
 
-
+    // Mostrar formulario de registro
     public function create()
     {
-        $url = rtrim(env('URL_SERVER_API'), '/');
-
         $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
+            $this->apiUrl() . '/areas'
         );
-
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
 
         $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
+            $this->apiUrl() . '/training-centers'
         );
 
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
+        if (
+            !($areasResponse['success'] ?? false) ||
+            !($centersResponse['success'] ?? false)
+        ) {
+            return back()->withErrors([
+                'api' => 'No se pudieron recuperar las áreas y centros de formación.'
+            ]);
+        }
+
+        $areas = $areasResponse['data'] ?? [];
+        $trainigCenters = $centersResponse['data'] ?? [];
 
         return view(
             'teacher.create',
@@ -72,12 +97,11 @@ class TeacherController extends Controller
         );
     }
 
+    // Registrar docente
 
-
-
+    // Registrar docente
     public function store(Request $request)
     {
-        // Validamos los datos recibidos del formulario web
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -85,59 +109,66 @@ class TeacherController extends Controller
             'trainig_center_id' => 'required|integer',
         ]);
 
-        // Dirección base de tu API
-        $url = rtrim(env('URL_SERVER_API'), '/');
+        $response = Http::acceptJson()->post(
+            $this->apiUrl() . '/teachers',
+            $validated
+        );
 
-        // Enviamos los datos a la API
-        $response = Http::post($url . '/teachers', $validated);
-
-        // Si la API registra el instructor
-        if ($response->successful()) {
+        if (
+            $response->successful() &&
+            ($response->json('success') ?? false)
+        ) {
             return redirect()
                 ->route('teacher.index')
                 ->with('success', 'Instructor registrado correctamente.');
         }
 
-        // Si la API responde con un error, mostramos su información
-        $mensaje = $response->json('message')
-            ?? 'No fue posible registrar el instructor.';
+        $errors = $response->json('errors') ?? [];
 
         return back()
-            ->withErrors([
-                'api' => $mensaje . ' Código HTTP: ' . $response->status(),
-            ])
+            ->withErrors(
+                !empty($errors)
+                    ? $errors
+                    : [
+                        'api' => $response->json('message')
+                            ?? $response->body()
+                    ]
+            )
             ->withInput();
     }
 
 
-
-
+    // Mostrar formulario de edición
     public function edit($id)
     {
-        $url = rtrim(env('URL_SERVER_API'), '/');
+        $teacherResponse = $this->fetchDataFromApi(
+            $this->apiUrl() . '/teachers/' . $id
+        );
 
-        // Obtener docente
-        $teacherResponse = Http::get($url . '/teachers/' . $id);
+        $areasResponse = $this->fetchDataFromApi(
+            $this->apiUrl() . '/areas'
+        );
 
-        // Obtener áreas
-        $areasResponse = Http::get($url . '/areas');
-
-        // Obtener centros
-        $centersResponse = Http::get($url . '/training-centers');
+        $centersResponse = $this->fetchDataFromApi(
+            $this->apiUrl() . '/training-centers'
+        );
 
         if (
-            !$teacherResponse->successful() ||
-            !$areasResponse->successful() ||
-            !$centersResponse->successful()
+            !($teacherResponse['success'] ?? false) ||
+            !($areasResponse['success'] ?? false) ||
+            !($centersResponse['success'] ?? false)
         ) {
             return back()->withErrors([
-                'api' => 'No se pudo recuperar toda la información requerida desde la API externa.'
+                'api' => 'No se pudo recuperar la información para editar.'
             ]);
         }
 
-        $teacher = $teacherResponse->json('data') ?? [];
-        $areas = $areasResponse->json('data') ?? [];
-        $trainigCenters = $centersResponse->json('data') ?? [];
+        $teacher = $teacherResponse['data'];
+        $teacher['trainig_center_id'] = $teacher['trainig_center_id']
+            ?? $teacher['training_center_id']
+            ?? '';
+        $areas = $areasResponse['data'];
+        $trainigCenters = $centersResponse['data'];
 
         return view('teacher.edit', compact(
             'teacher',
@@ -147,49 +178,50 @@ class TeacherController extends Controller
     }
 
 
+    // Actualizar docente
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|max:255',
             'area_id' => 'required|integer',
             'trainig_center_id' => 'required|integer',
         ]);
 
-        $url = rtrim(env('URL_SERVER_API'), '/');
-
-        $data = [
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'area_id' => $request->input('area_id'),
-            'trainig_center_id' => $request->input('trainig_center_id'),
-        ];
-
-        $response = Http::put(
-            $url . '/teachers/' . $id,
-            $data
+        $response = Http::acceptJson()->put(
+            $this->apiUrl() . '/teachers/' . $id,
+            $validated
         );
 
-        if ($response->successful()) {
+        if (
+            $response->successful() &&
+            ($response->json('success') ?? false)
+        ) {
             return redirect()
-                ->route('teacher.index')
+                ->route('teacher.show', $id)
                 ->with('success', 'Docente actualizado correctamente.');
         }
 
+        $errors = $response->json('errors') ?? [];
+
         return back()
-            ->withErrors([
-                'api' => 'Error al actualizar el docente: ' .
-                    ($response->json('message') ?? $response->body()),
-            ])
+            ->withErrors(
+                !empty($errors)
+                    ? $errors
+                    : [
+                        'api' => $response->json('message')
+                            ?? $response->body()
+                    ]
+            )
             ->withInput();
     }
 
+
+    // Eliminar docente
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
-
         $response = Http::delete(
-            $url . '/teachers/' . $id
+            $this->apiUrl() . '/teachers/' . $id
         );
 
         if ($response->successful()) {
@@ -199,7 +231,8 @@ class TeacherController extends Controller
         }
 
         return back()->withErrors([
-            'api' => 'No fue posible eliminar el docente desde la API.',
+            'api' => 'No fue posible eliminar el docente: ' .
+                ($response->json('message') ?? $response->body())
         ]);
     }
 }
