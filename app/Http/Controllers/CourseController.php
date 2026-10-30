@@ -10,21 +10,12 @@ class CourseController extends Controller
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
-
-        if (!$response->successful()) {
-            return [];
-        }
-
-        $data = $response->json();
-
-        return is_array($data) ? $data : [];
+        return $response->json();
     }
 
     private function extractData($response)
     {
-        return is_array($response)
-            ? ($response['data'] ?? $response)
-            : [];
+        return is_array($response) ? ($response['data'] ?? $response) : [];
     }
 
     public function index()
@@ -63,117 +54,69 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'course_number' => 'required',
-            'day' => 'required',
-            'area_id' => 'required',
+            'course_number'      => 'required',
+            'day'                => 'required',
+            'area_id'            => 'required',
             'training_center_id' => 'required',
         ]);
 
         $url = rtrim(env('URL_SERVER_API'), '/') . '/courses';
 
-        $response = Http::asForm()->post($url, [
-            'course_number' => $request->course_number,
-            'day' => $request->day,
-            'area_id' => $request->area_id,
+        Http::asForm()->post($url, [
+            'course_number'     => $request->course_number,
+            'day'               => $request->day,
+            'area_id'          => $request->area_id,
             'trainig_center_id' => $request->training_center_id,
         ]);
 
-        if ($response->successful() && $response->json('success')) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso registrado correctamente.');
-        }
-
-        return back()
-            ->withInput()
-            ->withErrors([
-                'api' => 'Error al registrar el curso: ' .
-                    $response->body()
-            ]);
+        return redirect()->route('course.index');
     }
 
     public function edit($id)
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $courseResponse = $this->fetchDataFromApi(
-            $url . '/courses/' . $id
-        );
-
+        $courseResponse = $this->fetchDataFromApi($url . '/courses/' . $id);
         $course = $this->extractData($courseResponse);
-
-        if (empty($course)) {
-            return redirect()
-                ->route('course.index')
-                ->withErrors(['api' => 'No se encontró el curso solicitado.']);
-        }
 
         $course['training_center_id'] = $course['trainig_center_id'] ?? '';
 
         $areasResponse = $this->fetchDataFromApi($url . '/areas');
         $areas = $this->extractData($areasResponse);
 
-        $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
-        );
-
+        $centersResponse = $this->fetchDataFromApi($url . '/training-centers');
         $trainigCenters = $this->extractData($centersResponse);
 
-        return view(
-            'course.edit',
-            compact('course', 'areas', 'trainigCenters')
-        );
+        return view('course.edit', compact('course', 'areas', 'trainigCenters'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'course_number' => 'required',
-            'day' => 'required',
-            'area_id' => 'required|integer',
+            'course_number'      => 'required',
+            'day'                => 'required',
+            'area_id'            => 'required|integer',
             'training_center_id' => 'required|integer',
         ]);
 
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $response = Http::asForm()->put(
-            $url . '/courses/' . $id,
-            [
-                'course_number' => $request->input('course_number'),
-                'day' => $request->input('day'),
-                'area_id' => $request->input('area_id'),
-                'trainig_center_id' => $request->input('training_center_id'),
-            ]
-        );
+        Http::asForm()->put($url . '/courses/' . $id, [
+            'course_number'     => $request->input('course_number'),
+            'day'               => $request->input('day'),
+            'area_id'          => $request->input('area_id'),
+            'trainig_center_id' => $request->input('training_center_id'),
+        ]);
 
-        if ($response->successful()) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso actualizado correctamente.');
-        }
-
-        return back()
-            ->withErrors([
-                'api' => 'Error al actualizar el curso: ' . $response->body(),
-            ])
-            ->withInput();
+        return redirect()->route('course.index');
     }
 
     public function destroy($id)
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $response = Http::delete($url . '/courses/' . $id);
+        Http::delete($url . '/courses/' . $id);
 
-        if ($response->successful()) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso eliminado correctamente.');
-        }
-
-        return back()->withErrors([
-            'api' => 'No fue posible eliminar el curso desde la API: '
-                . $response->body(),
-        ]);
+        return redirect()->route('course.index');
     }
 }
