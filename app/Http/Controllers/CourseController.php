@@ -7,18 +7,20 @@ use Illuminate\Support\Facades\Http;
 
 class CourseController extends Controller
 {
-
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
-
         return $response->json();
     }
 
+    private function extractData($response)
+    {
+        return is_array($response) ? ($response['data'] ?? $response) : [];
+    }
 
     public function index()
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
         $response = $this->fetchDataFromApi($url . '/courses');
 
@@ -29,10 +31,9 @@ class CourseController extends Controller
         return view('course.index', compact('courses'));
     }
 
-
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
         $response = $this->fetchDataFromApi($url . '/courses/' . $id);
 
@@ -43,130 +44,57 @@ class CourseController extends Controller
         return view('course.show', compact('course'));
     }
 
-
     public function create()
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
-        );
+        $areasResponse = $this->fetchDataFromApi($url . '/areas');
+        $areas = $this->extractData($areasResponse);
 
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
+        $centersResponse = $this->fetchDataFromApi($url . '/training-centers');
+        $trainigCenters = $this->extractData($centersResponse);
 
-        $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
-        );
-
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
-
-        return view(
-            'course.create',
-            compact('areas', 'trainigCenters')
-        );
+        return view('course.create', compact('areas', 'trainigCenters'));
     }
-
 
     public function store(Request $request)
     {
         $request->validate([
             'course_number'      => 'required',
             'day'                => 'required',
-            'area_id'            => 'required|integer',
-            'training_center_id' => 'required|integer',
-            'image'              => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'area_id'            => 'required',
+            'training_center_id' => 'required',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/') . '/courses';
 
-        $data = [
-            'course_number'      => $request->input('course_number'),
-            'day'                => $request->input('day'),
-            'area_id'            => $request->input('area_id'),
-            'training_center_id' => $request->input('training_center_id'),
-        ];
+        Http::asForm()->post($url, [
+            'course_number'     => $request->course_number,
+            'day'               => $request->day,
+            'area_id'          => $request->area_id,
+            'trainig_center_id' => $request->training_center_id,
+        ]);
 
-        $http = Http::asMultipart();
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            $http = $http->attach(
-                'image',
-                file_get_contents($image->getRealPath()),
-                $image->getClientOriginalName()
-            );
-        }
-
-        $response = $http->post(
-            $url . '/courses',
-            array_merge(
-                array_map(
-                    fn($key, $value) => [
-                        'name' => $key,
-                        'contents' => (string) $value,
-                    ],
-                    array_keys($data),
-                    array_values($data)
-                ),
-                []
-            )
-        );
-
-        if ($response->successful()) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso registrado correctamente.');
-        }
-
-        return back()
-            ->withErrors([
-                'api' => 'Error al registrar el curso en la API: '
-                    . $response->body(),
-            ])
-            ->withInput();
+        return redirect()->route('course.index');
     }
-
 
     public function edit($id)
     {
         $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $courseResponse = $this->fetchDataFromApi(
-            $url . '/courses/' . $id
-        );
+        $courseResponse = $this->fetchDataFromApi($url . '/courses/' . $id);
+        $course = $this->extractData($courseResponse);
 
-        $course = is_array($courseResponse)
-            ? ($courseResponse['data'] ?? $courseResponse)
-            : [];
+        $course['training_center_id'] = $course['trainig_center_id'] ?? '';
 
-        $areasResponse = $this->fetchDataFromApi(
-            $url . '/areas'
-        );
+        $areasResponse = $this->fetchDataFromApi($url . '/areas');
+        $areas = $this->extractData($areasResponse);
 
-        $areas = is_array($areasResponse)
-            ? ($areasResponse['data'] ?? $areasResponse)
-            : [];
+        $centersResponse = $this->fetchDataFromApi($url . '/training-centers');
+        $trainigCenters = $this->extractData($centersResponse);
 
-        $centersResponse = $this->fetchDataFromApi(
-            $url . '/training-centers'
-        );
-
-        $trainigCenters = is_array($centersResponse)
-            ? ($centersResponse['data'] ?? $centersResponse)
-            : [];
-
-        return view(
-            'course.edit',
-            compact('course', 'areas', 'trainigCenters')
-        );
+        return view('course.edit', compact('course', 'areas', 'trainigCenters'));
     }
-
-
 
     public function update(Request $request, $id)
     {
@@ -177,72 +105,24 @@ class CourseController extends Controller
             'training_center_id' => 'required|integer',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $data = [
-            'course_number'      => $request->input('course_number'),
-            'day'                => $request->input('day'),
-            'area_id'            => $request->input('area_id'),
-            'training_center_id' => $request->input('training_center_id'),
-            '_method'            => 'PUT',
-        ];
+        Http::asForm()->put($url . '/courses/' . $id, [
+            'course_number'     => $request->input('course_number'),
+            'day'               => $request->input('day'),
+            'area_id'          => $request->input('area_id'),
+            'trainig_center_id' => $request->input('training_center_id'),
+        ]);
 
-        $http = Http::asMultipart();
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            $http = $http->attach(
-                'image',
-                file_get_contents($image->getRealPath()),
-                $image->getClientOriginalName()
-            );
-        }
-
-        $multipartData = [];
-
-        foreach ($data as $key => $value) {
-            $multipartData[] = [
-                'name' => $key,
-                'contents' => (string) $value,
-            ];
-        }
-
-        $response = $http->post(
-            $url . '/courses/' . $id,
-            $multipartData
-        );
-
-        if ($response->successful()) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso actualizado correctamente.');
-        }
-
-        return back()
-            ->withErrors([
-                'api' => 'Error al actualizar el curso en la API: '
-                    . $response->body(),
-            ])
-            ->withInput();
+        return redirect()->route('course.index');
     }
 
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = rtrim(env('URL_SERVER_API'), '/');
 
-        $response = Http::delete(
-            $url . '/courses/' . $id
-        );
+        Http::delete($url . '/courses/' . $id);
 
-        if ($response->successful()) {
-            return redirect()
-                ->route('course.index')
-                ->with('success', 'Curso eliminado correctamente.');
-        }
-
-        return back()->withErrors([
-            'api' => 'No fue posible eliminar el curso desde la API.',
-        ]);
+        return redirect()->route('course.index');
     }
 }

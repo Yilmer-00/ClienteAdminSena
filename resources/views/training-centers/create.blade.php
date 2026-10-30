@@ -40,7 +40,7 @@
         </div>
 
         <div class="card-body p-4 bg-light">
-            <form action="{{ route('trainig-center.store') }}" method="POST">
+            <form action="{{ route('trainig-center.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Sección: Información del Centro -->
@@ -64,6 +64,24 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted">
+                            Imagen del centro:
+                        </label>
+
+                        <input
+                            type="file"
+                            name="imagen"
+                            class="form-control shadow-sm @error('imagen') is-invalid @enderror"
+                            accept=".jpg,.jpeg,.png,.webp"
+                            required>
+
+                        @error('imagen')
+                        <div class="invalid-feedback d-block">
+                            {{ $message }}
+                        </div>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Botón de Registro -->
@@ -72,7 +90,6 @@
                         💾 Guardar Centro
                     </button>
                 </div>
-
             </form>
         </div>
     </div>

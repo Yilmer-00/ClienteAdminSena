@@ -40,19 +40,34 @@
         </div>
 
         <div class="card-body p-4 bg-light">
-            <form action="{{ route('area.store') }}" method="POST">
+            <!-- Formulario con soporte para archivos -->
+            <form action="{{ route('area.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Sección: Información del Área -->
                 <h5 class="text-success mb-3 border-bottom pb-2">📂 Datos del Área</h5>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <!-- Nombre del Área -->
                     <label class="form-label fw-bold text-muted">Nombre del Área:</label>
                     <input type="text" name="name" value="{{ old('name') }}" class="form-control shadow-sm @error('name') is-invalid @enderror" placeholder="Ej. Análisis y Desarrollo de Software" required>
                     @error('name')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <!-- Campo para la Imagen -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        Imagen del área
+                    </label>
+
+                    <input
+                        type="file"
+                        name="imagen"
+                        class="form-control"
+                        accept="image/jpeg,image/png,image/webp"
+                        required>
                 </div>
 
                 <!-- Botón de Registro -->

@@ -33,7 +33,9 @@
                             <th class="ps-4 py-3 text-muted fw-bold" style="width: 10%;">ID</th>
                             <th class="py-3 text-muted fw-bold" style="width: 40%;">Nombre del Centro</th>
                             <th class="py-3 text-muted fw-bold" style="width: 25%;">Ubicación</th>
+                            <th class="py-3 text-center text-muted fw-bold" style="width: 25%;">imagenes</th>
                             <th class="py-3 text-center text-muted fw-bold" style="width: 25%;">Acciones</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -43,6 +45,9 @@
                             <td class="fw-semibold text-dark">{{ $center['name'] }}</td>
                             <td class="text-secondary">
                                 <i class="fas fa-map-marker-alt text-success me-1"></i> {{ $center['location'] }}
+                            </td>
+                            <td>
+                                <img src="{{ $center['imagen_url'] }}" alt="{{ $center['name'] }}" width="100">
                             </td>
                             <td class="pe-4 text-center">
                                 <div class="d-flex gap-2 justify-content-center align-items-center">

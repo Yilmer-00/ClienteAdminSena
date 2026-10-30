@@ -2,25 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 class TrainigCenterController extends Controller
 {
-
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
         return $response->json();
     }
 
-
     public function index()
     {
         $url = env('URL_SERVER_API');
-        $response = $this->fetchDataFromApi($url . '/training-centers');
 
-        // Si la respuesta es nula o no es arreglo, retorna un arreglo vacío para evitar errores
+        $response = $this->fetchDataFromApi($url . '/training-centers');
         $trainigCenters = is_array($response) ? ($response['data'] ?? $response) : [];
 
         return view('training-centers.index', compact('trainigCenters'));
@@ -32,26 +29,21 @@ class TrainigCenterController extends Controller
         return view('training-centers.create');
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'imagen' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         $url = env('URL_SERVER_API');
-        $response = Http::post($url . '/training-centers', [
-            'name' => $request->name,
-            'location' => $request->location,
-        ]);
 
-        if ($response->successful()) {
-            return redirect()->route('trainig-center.index')->with('success', 'Centro de formación creado correctamente.');
+        $file = $request->file('imagen');
+        $response = Http::attach('imagen', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+            ->post(env('URL_SERVER_API') . '/training-centers', ['name' => $request->name, 'location' => $request->location]);
+        return redirect()->route('trainig-center.index');
         }
-
-        return back()->withErrors('Error al registrar el centro de formación en la API.')->withInput();
-    }
 
 
     public function show($id)
@@ -68,40 +60,36 @@ class TrainigCenterController extends Controller
     public function edit($id)
     {
         $url = env('URL_SERVER_API');
-        $response = $this->fetchDataFromApi($url . '/training-centers/' . $id);
 
+        $response = $this->fetchDataFromApi($url . '/training-centers/' . $id);
         $trainigCenter = is_array($response) ? ($response['data'] ?? $response) : [];
 
         return view('training-centers.edit', compact('trainigCenter'));
     }
 
-
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'     => 'required|string|max:255',
             'location' => 'required|string|max:255',
         ]);
 
         $url = env('URL_SERVER_API');
-        $response = Http::put($url . '/training-centers/' . $id, [
-            'name' => $request->name,
+
+        Http::put($url . '/training-centers/' . $id, [
+            'name'     => $request->name,
             'location' => $request->location,
         ]);
 
-        if ($response->successful()) {
-            return redirect()->route('trainig-center.index')->with('success', 'Centro de formación actualizado correctamente.');
-        }
-
-        return back()->withErrors('Error al actualizar el centro de formación en la API.')->withInput();
+        return redirect()->route('trainig-center.index');
     }
-
 
     public function destroy($id)
     {
         $url = env('URL_SERVER_API');
-        $response = Http::delete($url . '/training-centers/' . $id);
 
-        return redirect()->route('trainig-center.index')->with('success', 'Centro de formación eliminado correctamente.');
+        Http::delete($url . '/training-centers/' . $id);
+
+        return redirect()->route('trainig-center.index');
     }
 }

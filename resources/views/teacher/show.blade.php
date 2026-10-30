@@ -3,8 +3,17 @@
 @section('content')
 <div class="container" style="max-width: 750px; margin-top: 30px;">
     <div class="mb-3">
-        <a href="{{ url('/teacher/list') }}" class="btn btn-secondary btn-sm">← Volver</a>
+        <a href="{{ url('/teachers') }}" class="btn btn-secondary btn-sm">← Volver</a>
+        @if(!empty($teacher['id']))
+        <a href="{{ route('teacher.edit', $teacher['id']) }}" class="btn btn-warning btn-sm">Editar instructor</a>
+        @endif
     </div>
+
+    @if(session('success'))
+    <div class="alert alert-success" role="alert">
+        {{ session('success') }}
+    </div>
+    @endif
 
     <!-- Alerta de Advertencia si la API no responde o el instructor está vacío -->
     @if(empty($teacher))

@@ -35,6 +35,7 @@
                         <tr>
                             <th class="ps-4 py-3 text-muted fw-bold" style="width: 10%;">ID</th>
                             <th class="py-3 text-muted fw-bold" style="width: 60%;">Nombre del Área</th>
+                            <th class="py-3 text-muted fw-bold" style="width: 60%;">imagen</th>
                             <th class="py-3 text-center text-muted fw-bold" style="width: 30%;">Acciones</th>
                         </tr>
                     </thead>
@@ -49,6 +50,9 @@
                             <!-- Nombre del Área -->
                             <td class="fw-semibold text-dark">
                                 {{ $area['name'] }}
+                            </td>
+                            <td>
+                                <img src="{{ $area['imagen_url'] }}" alt="{{ $area['name'] }}" width="100">
                             </td>
 
                             <!-- Botones de Acciones Conectados -->

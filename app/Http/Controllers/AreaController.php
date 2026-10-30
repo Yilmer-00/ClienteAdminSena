@@ -7,113 +7,132 @@ use Illuminate\Support\Facades\Http;
 
 class AreaController extends Controller
 {
-
-    //Método privado para manejar llamadas HTTP repetitivas (GET)
+    private function apiUrl()
+    {
+        return rtrim(env('URL_SERVER_API'), '/');
+    }
 
     private function fetchDataFromApi($url)
     {
-        $response = Http::get($url);
+        $response = Http::acceptJson()->get($url);
+
+        if ($response->failed()) {
+            return [];
+        }
+
         return $response->json();
     }
 
-
-    //Mostrar una lista de todas las áreas consumiendo la API.
-
+    // Mostrar todas las áreas
     public function index()
     {
-        $url = env('URL_SERVER_API');
-        $response = $this->fetchDataFromApi($url . '/areas');
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/areas'
+        );
 
-        // Extrae los datos de forma segura (si viene envuelto en 'data' o directo)
-        $areas = is_array($response) && isset($response['data']) ? $response['data'] : ($response ?? []);
+        $areas = $response['data'] ?? [];
 
         return view('areas.index', compact('areas'));
     }
 
-
-    //Mostrar el formulario para registrar una nueva área.
-
+    // Formulario para crear
     public function create()
     {
         return view('areas.create');
     }
 
-
-    //Almacenar una nueva área enviándola a la API.
-
+    // Guardar área
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'imagen' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         $url = env('URL_SERVER_API');
-        $response = Http::post($url . '/areas', [
-            'name' => $request->name,
-        ]);
 
-        if ($response->successful()) {
-            return redirect()->route('area.index')->with('success', 'areas creada correctamente.');
-        }
+        $file = $request->file('imagen');
 
-        return redirect()->route('area.index')->with('success', 'Área creada correctamente.');
+        $response = Http::attach('imagen', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+            ->post(env('URL_SERVER_API') . '/areas', ['name' => $request->name,]);
+
+        return redirect()->route('area.index');
     }
 
-
-    //Mostrar los detalles de un área específica consumiendo la API.
-
+    // Mostrar un área
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
-        $response = $this->fetchDataFromApi($url . '/areas/' . $id);
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/areas/' . $id
+        );
 
-        $area = is_array($response) && isset($response['data']) ? $response['data'] : $response;
+        $area = $response['data'] ?? [];
 
         return view('areas.show', compact('area'));
     }
 
-
-    //Mostrar el formulario para editar un área existente.
-
+    // Formulario para editar
     public function edit($id)
     {
-        $url = env('URL_SERVER_API');
-        $response = $this->fetchDataFromApi($url . '/areas/' . $id);
+        $response = $this->fetchDataFromApi(
+            $this->apiUrl() . '/areas/' . $id
+        );
 
-        $area = is_array($response) && isset($response['data']) ? $response['data'] : $response;
+        $area = $response['data'] ?? [];
+
+        if (empty($area)) {
+            return redirect()
+                ->route('area.index')
+                ->withErrors(['error' => 'Área no encontrada.']);
+        }
 
         return view('areas.edit', compact('area'));
     }
 
-
-    //Actualizar un área existente en la API.
-
+    // Actualizar área
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        $url = env('URL_SERVER_API');
-        $response = Http::put($url . '/areas/' . $id, [
-            'name' => $request->name,
-        ]);
+        $response = Http::acceptJson()->put(
+            $this->apiUrl() . '/areas/' . $id,
+            [
+                'name' => $request->name,
+            ]
+        );
 
-        if ($response->successful()) {
-            return redirect()->route('area.index')->with('success', 'Área actualizada correctamente.');
+        if ($response->failed()) {
+            return back()
+                ->withErrors([
+                    'error' => $response->json('message')
+                        ?? $response->body()
+                ])
+                ->withInput();
         }
 
-        return back()->withErrors('Error al actualizar el área en la API.')->withInput();
+        return redirect()
+            ->route('area.index')
+            ->with('success', 'Área actualizada correctamente.');
     }
 
-
-    //Eliminar un área de la API.
-
+    // Eliminar área
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
-        $response = Http::delete($url . '/areas/' . $id);
+        $response = Http::acceptJson()->delete(
+            $this->apiUrl() . '/areas/' . $id
+        );
 
-        return redirect()->route('area.index')->with('success', 'Área eliminada correctamente.');
+        if ($response->failed()) {
+            return back()->withErrors([
+                'error' => $response->json('message')
+                    ?? $response->body()
+            ]);
+        }
+
+        return redirect()
+            ->route('area.index')
+            ->with('success', 'Área eliminada correctamente.');
     }
 }

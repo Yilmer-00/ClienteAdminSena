@@ -10,10 +10,28 @@
         </a>
     </div>
 
-    <!-- Alerta de Errores de Validación -->
+    {{-- Mensajes de éxito --}}
+    @if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    @endif
+
+    {{-- Mensajes de error --}}
+    @if (session('error'))
+    <div class="alert alert-danger shadow-sm" role="alert">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    {{-- Errores de validación --}}
     @if ($errors->any())
-    <div class="alert alert-danger shadow-sm border-0 mb-4" style="border-left: 5px solid #dc3545 !important;">
-        <strong class="d-block mb-1">⚠️ Por favor corrige los siguientes errores:</strong>
+    <div class="alert alert-danger shadow-sm border-0 mb-4" style="border-left: 5px solid #dc3545 !important;" role="alert">
+        <strong class="d-block mb-2">
+            <i class="bi bi-exclamation-triangle"></i>
+            Por favor, corrige los siguientes errores:
+        </strong>
         <ul class="mb-0 ps-3">
             @foreach ($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -73,9 +91,9 @@
                         💾 Guardar Cambios
                     </button>
                 </div>
-
             </form>
         </div>
     </div>
+
 </div>
 @endsection

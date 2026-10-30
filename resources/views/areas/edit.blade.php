@@ -31,15 +31,15 @@
         </div>
 
         <div class="card-body p-4 bg-light">
-            <!-- La acción apunta a .update pasando el ID del área en formato de arreglo -->
-            <form action="{{ route('area.update', $area['id']) }}" method="POST">
+            <!-- AGREGADO: enctype para permitir subida de archivos en la actualización -->
+            <form action="{{ route('area.update', $area['id']) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT') <!-- Directiva requerida por Laravel para actualizar -->
 
                 <!-- Sección: Información del Área -->
                 <h5 class="text-success mb-3 border-bottom pb-2"> Datos del Área</h5>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <!-- Nombre del Área con su valor actual cargado desde la API -->
                     <label class="form-label fw-bold text-muted">Nombre del Área:</label>
                     <input type="text"
@@ -49,6 +49,26 @@
                         placeholder="Ej. Análisis y Desarrollo de Software"
                         required>
                     @error('name')
+                    <div class="invalid-feedback fw-bold">⚠️ {{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- NUEVO: Campo para actualizar la Imagen y previsualización si existe -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted">Actualizar Imagen:</label>
+
+                    @if(!empty($area['image']))
+                    <div class="mb-2">
+                        <span class="d-block text-muted small mb-1">Imagen actual:</span>
+                        <img src="{{ $area['image'] }}" alt="Imagen actual del área" class="img-thumbnail shadow-sm" style="max-height: 80px;">
+                    </div>
+                    @endif
+
+                    <input type="file"
+                        name="image"
+                        class="form-control shadow-sm @error('image') is-invalid @enderror"
+                        accept="image/*">
+                    @error('image')
                     <div class="invalid-feedback fw-bold">⚠️ {{ $message }}</div>
                     @enderror
                 </div>
