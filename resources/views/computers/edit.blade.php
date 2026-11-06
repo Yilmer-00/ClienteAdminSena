@@ -101,7 +101,7 @@
                 <!-- Botón de Actualización -->
                 <div class="text-end border-top pt-3">
                     <button type="submit" class="btn btn-success px-4 shadow" style="background-color: #39A900; border: none;">
-                         Actualizar Computador
+                        Actualizar Computador
                     </button>
                 </div>
 

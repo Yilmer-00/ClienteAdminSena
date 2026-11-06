@@ -19,15 +19,28 @@
     </div>
     @endif
 
+    <!-- Alerta de Errores de Validación General -->
+    @if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+        <strong>¡Atención!</strong> Por favor corrige los errores en el formulario.
+        <ul class="mb-0 mt-2">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <!-- Tarjeta del Formulario -->
     <div class="card shadow border-0">
         <!-- Encabezado con el Verde SENA -->
         <div class="card-header text-white py-3" style="background-color: #39A900;">
-            <h4 class="mb-0 fw-bold">+ Registrar Computador</h4>
+            <h4 class="mb-0 fw-bold">➕ Registrar Computador</h4>
         </div>
 
         <div class="card-body p-4 bg-light">
-            <!-- 1. IMPORTANTE: Se agregó enctype="multipart/form-data" -->
+            <!-- Formulario con soporte para archivos -->
             <form action="{{ route('computer.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
@@ -68,14 +81,15 @@
                     </div>
                 </div>
 
-                <!-- 2. NUEVA SECCIÓN: Campo para subir la fotografía -->
+                <!-- Campo para la Imagen corregido -->
                 <div class="mb-4">
-                    <label class="form-label fw-bold text-muted">Fotografía del Computador:</label>
+                    <label class="form-label fw-bold text-muted">Imagen del Computador:</label>
                     <input type="file"
                         name="urlFoto"
                         class="form-control shadow-sm @error('urlFoto') is-invalid @enderror"
-                        accept="image/*">
-                    <small class="text-muted d-block mt-1">Formatos permitidos: JPEG, PNG, JPG, GIF (Máx. 2MB)</small>
+                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                    >
+                    <small class="text-muted d-block mt-1">Opcional. Formatos permitidos: JPEG, PNG, JPG, WebP (Máx. 5MB)</small>
                     @error('urlFoto')
                     <div class="invalid-feedback fw-bold">
                         ⚠️ {{ $message }}
@@ -86,7 +100,7 @@
                 <!-- Botón de Registro -->
                 <div class="text-end border-top pt-3">
                     <button type="submit" class="btn btn-success px-4 shadow" style="background-color: #39A900; border: none;">
-                        Guardar Computador
+                        💾 Guardar Computador
                     </button>
                 </div>
 

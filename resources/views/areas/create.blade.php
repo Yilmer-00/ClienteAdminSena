@@ -47,8 +47,8 @@
                 <!-- Sección: Información del Área -->
                 <h5 class="text-success mb-3 border-bottom pb-2">📂 Datos del Área</h5>
 
+                <!-- Nombre del Área -->
                 <div class="mb-3">
-                    <!-- Nombre del Área -->
                     <label class="form-label fw-bold text-muted">Nombre del Área:</label>
                     <input type="text" name="name" value="{{ old('name') }}" class="form-control shadow-sm @error('name') is-invalid @enderror" placeholder="Ej. Análisis y Desarrollo de Software" required>
                     @error('name')
@@ -57,17 +57,12 @@
                 </div>
 
                 <!-- Campo para la Imagen -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">
-                        Imagen del área
-                    </label>
-
-                    <input
-                        type="file"
-                        name="imagen"
-                        class="form-control"
-                        accept="image/jpeg,image/png,image/webp"
-                        required>
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted">Imagen del Área</label>
+                    <input type="file" name="imagen" class="form-control shadow-sm @error('imagen') is-invalid @enderror" accept="image/jpeg,image/png,image/webp" required>
+                    @error('imagen')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Botón de Registro -->

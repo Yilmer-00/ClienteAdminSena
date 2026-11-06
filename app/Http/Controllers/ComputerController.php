@@ -7,28 +7,43 @@ use Illuminate\Http\Request;
 
 class ComputerController extends Controller
 {
-
+    private function apiUrl(): string
+    {
+        return rtrim((string) config('services.api.url'), '/');
+    }
 
     private function fetchDataFromApi($url)
     {
-        $response = Http::get($url);
+        $response = Http::acceptJson()->get($url);
         return $response->json();
     }
 
-
-
     public function index()
     {
-        $url = env('URL_SERVER_API');
+        $url = $this->apiUrl();
 
-        $response = $this->fetchDataFromApi($url . '/computers');
+        if ($url === '') {
+            return view('computers.index', [
+                'computers' => [],
+                'apiError' => 'No está configurada la URL del servidor de datos.',
+            ]);
+        }
 
-        $computers = is_array($response) ? ($response['data'] ?? $response) : [];
+        $response = Http::acceptJson()->get($url . '/computers');
+        $payload = $response->json();
+        $computers = is_array($payload) ? ($payload['data'] ?? $payload) : [];
+        $apiError = null;
 
-        return view('computers.index', compact('computers'));
+        if (!$response->successful()) {
+            $computers = [];
+            $apiError = 'No fue posible cargar los computadores. Verifica la conexión con el servidor de datos.';
+        } elseif (!is_array($computers) || !array_is_list($computers)) {
+            $computers = [];
+            $apiError = 'El servidor devolvió un listado de computadores con un formato no válido.';
+        }
+
+        return view('computers.index', compact('computers', 'apiError'));
     }
-
-
 
     public function create()
     {
@@ -39,15 +54,21 @@ class ComputerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'number' => 'required',
-            'brand' => 'required',
-            'urlFoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        $validated = $request->validate([
+            'number' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'urlFoto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
-        $url = env('URL_SERVER_API');
-        $httpRequest = Http::asMultipart();
+        $url = $this->apiUrl();
 
+        if ($url === '') {
+            return back()
+                ->withErrors(['api' => 'No está configurada la URL del servidor de datos.'])
+                ->withInput();
+        }
+
+        $httpRequest = Http::acceptJson();
         if ($request->hasFile('urlFoto')) {
             $file = $request->file('urlFoto');
             $httpRequest->attach(
@@ -58,21 +79,24 @@ class ComputerController extends Controller
         }
 
         $response = $httpRequest->post($url . '/computers', [
-            'number' => $request->number,
-            'brand' => $request->brand,
+            'number' => $validated['number'],
+            'brand' => $validated['brand'],
         ]);
 
-        if ($response->successful()) {
-            return redirect()->route('computer.index')->with('success', 'Computador creado correctamente.');
+        if (!$response->successful()) {
+            return back()
+                ->withErrors(['api' => 'No se pudo registrar el computador en el servidor de datos. Verifica la información e inténtalo de nuevo.'])
+                ->withInput();
         }
 
-        return back()->withErrors('Error al registrar el computador en la API.')->withInput();
+        return redirect()
+            ->route('computer.index')
+            ->with('success', 'Computador creado correctamente.');
     }
-
 
     public function show($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = $this->apiUrl();
 
         $response = $this->fetchDataFromApi($url . '/computers/' . $id);
         $computer = is_array($response) ? ($response['data'] ?? $response) : [];
@@ -96,7 +120,7 @@ class ComputerController extends Controller
             'urlFoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $url = env('URL_SERVER_API');
+        $url = $this->apiUrl();
         $httpRequest = Http::asMultipart();
 
         if ($request->hasFile('urlFoto')) {
@@ -118,7 +142,7 @@ class ComputerController extends Controller
 
     public function destroy($id)
     {
-        $url = env('URL_SERVER_API');
+        $url = $this->apiUrl();
 
         Http::delete($url . '/computers/' . $id);
 
